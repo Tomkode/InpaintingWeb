@@ -1,6 +1,4 @@
 export async function inpaintImage(file, mask) {
-  // Uncomment and use this for real API
-  
   const formData = new FormData();
   formData.append('image', file, 'image.png');
   formData.append('x1', mask.x1);
@@ -16,8 +14,6 @@ export async function inpaintImage(file, mask) {
   const data = await res.json();
   const pixelArray = data.image;
   return arrayToImageDataURL(pixelArray);
-  
-  // Stub: return a placeholder image
 }
 
 // Utility: Convert 3D pixel array to PNG data URL
@@ -36,7 +32,7 @@ function arrayToImageDataURL(pixelArray) {
       imageData.data[i++] = r;
       imageData.data[i++] = g;
       imageData.data[i++] = b;
-      imageData.data[i++] = 255; // alpha
+      imageData.data[i++] = 255;
     }
   }
   ctx.putImageData(imageData, 0, 0);
