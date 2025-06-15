@@ -13,17 +13,45 @@ function App() {
   const [error, setError] = useState('');
   const [elapsedTime, setElapsedTime] = useState(0);
   const [finalTime, setFinalTime] = useState(null);
+  const [selectedFormat, setSelectedFormat] = useState('png');
   const timerRef = useRef(null);
   const startTimeRef = useRef(null);
 
-  const handleDownload = () => {
+  const convertImageFormat = async (imageUrl, format) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    
+    return new Promise((resolve) => {
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        
+        const mimeType = `image/${format}`;
+        const quality = format === 'jpeg' ? 0.9 : undefined;
+        const dataUrl = canvas.toDataURL(mimeType, quality);
+        resolve(dataUrl);
+      };
+      img.src = imageUrl;
+    });
+  };
+
+  const handleDownload = async (format = 'png') => {
     if (!result) return;
-    const link = document.createElement('a');
-    link.href = result;
-    link.download = 'inpainted-image.png';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    
+    try {
+      const convertedImage = await convertImageFormat(result, format);
+      const link = document.createElement('a');
+      link.href = convertedImage;
+      link.download = `inpainted-image.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error downloading image:', error);
+    }
   };
 
   const handleImageUpload = (imgObj) => {
@@ -56,7 +84,6 @@ function App() {
     setElapsedTime(0);
     setFinalTime(null);
     
-    // Start timer
     startTimeRef.current = Date.now();
     timerRef.current = setInterval(() => {
       setElapsedTime(Math.floor((Date.now() - startTimeRef.current) / 1000));
@@ -69,7 +96,6 @@ function App() {
       setError('Failed to inpaint image.');
     } finally {
       setLoading(false);
-      // Stop timer and save final time
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
@@ -82,7 +108,7 @@ function App() {
   return (
     <div className="container">
       <h1>AI Face Inpainting Tool</h1>
-      <p className="subtitle">Advanced Image Restoration for Human Faces</p>
+      <p className="subtitle">Advanced Image Restoration for Human Faces using Diffusion Models</p>
       <p className="desc">Upload a face image and select the area you want to restore. Our AI model will intelligently fill in the masked region with realistic facial features.</p>
       <div className="card">
         <h2>Image Inpainting Interface</h2>
@@ -119,12 +145,25 @@ function App() {
         {error && <div className="error">{error}</div>}
         {result && (
           <div className="result-section">
-            <h3>Inpainted Result</h3>
             <div className="result-info">
               <p className="processing-time">Processing completed in {finalTime} seconds</p>
-              <button className="download-btn" onClick={handleDownload}>
-                Download Image
-              </button>
+              <div className="download-controls">
+                <div className="format-select-wrapper">
+                  <select 
+                    className="format-select"
+                    value={selectedFormat}
+                    onChange={(e) => setSelectedFormat(e.target.value)}
+                  >
+                    <option value="png">PNG</option>
+                    <option value="jpeg">JPEG</option>
+                    <option value="webp">WebP</option>
+                  </select>
+                  <div className="format-select-arrow">▼</div>
+                </div>
+                <button className="download-btn" onClick={() => handleDownload(selectedFormat)}>
+                  Download Image
+                </button>
+              </div>
             </div>
             <img src={result} alt="Inpainted result" className="result-img" />
           </div>

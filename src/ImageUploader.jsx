@@ -54,7 +54,7 @@ function ImageUploader({ onImageUpload }) {
     >
       <input
         type="file"
-        accept="image/jpeg,image/png,image/gif"
+        accept="image/jpeg,image/png"
         style={{ display: 'none' }}
         ref={inputRef}
         onChange={onChange}
@@ -63,7 +63,7 @@ function ImageUploader({ onImageUpload }) {
         <div className="upload-icon">&#8682;</div>
         <div className="upload-title">Upload Face Image</div>
         <div className="upload-desc">Drag and drop or click to select</div>
-        <div className="upload-types">Supports JPG, PNG, GIF</div>
+        <div className="upload-types">Supports JPG and PNG</div>
       </div>
     </div>
   );

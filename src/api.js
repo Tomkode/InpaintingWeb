@@ -12,7 +12,6 @@ export async function inpaintImage(file, mask) {
     method: 'POST',
     body: formData
   });
-  console.log(res);
   if (!res.ok) throw new Error('API error');
   const data = await res.json();
   const pixelArray = data.image;
